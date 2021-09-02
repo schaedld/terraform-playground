@@ -1,5 +1,5 @@
 # Defining variables for the ressources
-variable "sqlsrv_name_prefix" {
+variable "sql_server_name" {
   type = string
-  description = "A Random name generated with an uuid" 
+  description = "A Random name generated with an uuid"     
 }

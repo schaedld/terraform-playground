@@ -16,14 +16,9 @@ provider "azurerm"{
   subscription_id = ""
 }
 
-# uuid Ressource for name generation.
-resource "random_uuid" "randomname"{
-
-}
-
 # Create sample Ressource Group with the random uuid
 resource "azurerm_resource_group" "rg"{
-  name = "${random_uuid.randomname.result}-rg"
+  name = "${uuid()}-rg"
   location = "switzerlandnorth"
 }
 
@@ -45,7 +40,7 @@ resource "azurerm_storage_account" "storageacc" {
 }
 
 resource "azurerm_mssql_server" "sqlsrv" {
-  name                         = "${random_uuid.randomname.result}-sqlserver"
+  name                         = "sqlsrv-${random_integer.randomint.result}"
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
@@ -59,11 +54,6 @@ resource "azurerm_mssql_server" "sqlsrv" {
     storage_account_access_key_is_secondary = true
     retention_in_days                       = 6
   }
-
-  depends_on = [
-    random_uuid.randomname
-  ]
-
   tags = {
     environment = "test"
   }

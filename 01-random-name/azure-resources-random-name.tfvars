@@ -1,1 +1,1 @@
-sqlsrv_name_prefix = "sqlsrv"
+sql_server_name = "sqlsrv"
