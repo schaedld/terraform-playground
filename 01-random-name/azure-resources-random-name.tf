@@ -27,7 +27,6 @@ resource "random_integer" "randomint" {
   min = 10
   max = 99
 }
-
 resource "azurerm_storage_account" "storageacc" {
   name                     = "storageacc${random_integer.randomint.result}"
   resource_group_name      = azurerm_resource_group.rg.name
