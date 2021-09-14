@@ -27,8 +27,21 @@ resource "random_integer" "randomint" {
   min = 10
   max = 99
 }
+
+# Create random name for the storage Account
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+resource "random_string" "randomname" {
+  length = 23
+  special = false
+  lower = true
+  min_upper = 0 
+  min_lower = 20
+  min_numeric = 3
+}
+
+
 resource "azurerm_storage_account" "storageacc" {
-  name                     = "storageacc${random_integer.randomint.result}"
+  name                     = "${random_string.randomname.result}"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -56,4 +69,49 @@ resource "azurerm_mssql_server" "sqlsrv" {
   tags = {
     environment = "test"
   }
+}
+
+# Database Configuartion
+resource "azurerm_mssql_database" "sqldb" {
+  name           = "bddtest-${random_integer.randomint.result}"
+  server_id      = azurerm_mssql_server.sqlsrv.id
+  collation      = "SQL_Latin1_General_CP1_CI_AS"
+  license_type   = "LicenseIncluded"
+  max_size_gb    = 1
+  read_scale     = false
+  sku_name       = "Basic"
+  zone_redundant = false  
+
+  depends_on = [
+    azurerm_mssql_server.sqlsrv
+  ] 
+}
+
+# Create a random appservice plan.
+resource "azurerm_app_service_plan" "bddtestplan" {
+  name = "${random_string.randomname.result}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location = azurerm_resource_group.rg.location
+  sku {
+    tier = "Standard"
+    size = "S1"
+  }
+}
+
+# Create random web app with the connection string retrived from the storageaccount
+resource "azurerm_app_service" "bddtestappsvc" {
+  name = "${random_string.randomname.result}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location = azurerm_resource_group.rg.location
+  app_service_plan_id = azurerm_app_service_plan.bddtestplan.id
+  connection_string {
+    name = "sample"
+    type = "SQLServer"
+    value = azurerm_storage_account.storageacc.primary_connection_string
+  }
+  depends_on = [
+    azurerm_mssql_database.sqldb,
+    azurerm_storage_account.storageacc,
+    azurerm_app_service_plan.bddtestplan
+  ]
 }
