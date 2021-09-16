@@ -13,7 +13,7 @@ provider "azurerm"{
   features {}
   # Wichtig, für die Verwendung der kleinstmöglichen Privilegien.
   skip_provider_registration = true
-  subscription_id = "a40a25f3-5cee-4b4d-8a16-362b37856e94"
+  subscription_id = ""
 }
 
 # Create random resource group
